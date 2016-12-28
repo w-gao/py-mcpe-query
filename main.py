@@ -1,7 +1,7 @@
 from Query import *
 from ServerData import *
 
-# Change to host and port to whatever you want.
+# Change the host and port to whatever you want.
 host = 'localhost'
 port = 19132
 

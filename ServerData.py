@@ -1,3 +1,12 @@
+"""
+______ ___.__.           _____   ____ ______   ____             ________ __   ___________ ___.__.
+\____ <   |  |  ______  /     \_/ ___| |____ \_/ __ \   ______  / ____/  |  \_/ __ \_  __ <   |  |
+|  |_> >___  | /_____/ |  Y Y  \  \___|  |_> >  ___/  /_____/ < <_|  |  |  /\  ___/|  | \/\___  |
+|   __// ____|         |__|_|  /\___  >   __/ \___  >          \__   |____/  \___  >__|   / ____|
+|__|   \/                    \/     \/|__|        \/              |__|           \/       \/
+"""
+
+
 class ServerData:
 
     SUCCESS = False
@@ -41,11 +50,11 @@ class ServerData:
     def load_query(self):
         if self.query is None:
             print('QUERY OBJECT IS NONE!!!')
-            return False
+            return
 
         stats = self.query.query()
         if stats is None:
-            return False
+            return
 
         server_data = stats.split(r'\x01')
         server_data_1 = server_data[0].split(r'\x00')[2:-2]
@@ -84,4 +93,3 @@ class ServerData:
         self.PLAYERS = players
 
         self.SUCCESS = True
-        return True

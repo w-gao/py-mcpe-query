@@ -87,3 +87,17 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Compile outputs
+*.class
+out
+out/*
+Output
+Output/*
+
+# Intellij Platforms
+#*.iml
+.idea
+.idea/*
+
+# Generated files

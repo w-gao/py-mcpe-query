@@ -29,6 +29,9 @@ class Query:
             print("Cannot connect to the server. Error: ", msg)
             return None
 
+        # Returned stats
+        stats = None
+
         # get data from the server
         try:
             # Handshake
@@ -38,25 +41,22 @@ class Query:
             self.socket.send(hand_shake)
             token = self.socket.recv(65535)[5:-1].decode()
 
-            if token is None:
-                return None
+            if token is not None:
+                if self.short_data:
+                    payload = b''
+                else:
+                    payload = b"\x00\x00\x00\x00"
 
-            if self.short_data:
-                payload = b''
-            else:
-                payload = b"\x00\x00\x00\x00"
+                request_stat = Query.MAGIC + Query.STATISTICS + struct.pack("L", randint(1, 9999999)) + struct.pack(
+                    '>l', int(token)) + payload
 
-            request_stat = Query.MAGIC + Query.STATISTICS + struct.pack("L", randint(1, 9999999)) + struct.pack(
-                '>l', int(token)) + payload
-
-            self.socket.send(request_stat)
-            stats = str(self.socket.recv(65535)[5:])
-
-            return stats
+                self.socket.send(request_stat)
+                stats = str(self.socket.recv(65535)[5:])
 
         # The server is offline or it did not enable query
         except socket.error as msg:
             print('Failed to query. Error message: ', msg)
 
+        # print('closing the socket')
         self.socket.close()
-        return None
+        return stats

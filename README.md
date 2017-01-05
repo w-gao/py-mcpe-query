@@ -1,4 +1,5 @@
 # py-mcpe-query
+[![PyPI](https://img.shields.io/pypi/v/py_mcpe_query.svg)](https://pypi.python.org/pypi/py_mcpe_query/)
 
 ![py-mcpe-query](https://github.com/w-gao/py-mcpe-query/blob/master/images/logo.png)
 

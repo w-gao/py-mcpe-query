@@ -1,6 +1,14 @@
+"""Query an mcpe server easily
+
+query.py
+
+Copyright (c) 2017 w-gao
+"""
+
 import socket
 import struct
 from random import randint
+from ._server_data import ServerData
 
 """
 ______ ___.__.           _____   ____ ______   ____             ________ __   ___________ ___.__.
@@ -17,11 +25,10 @@ class Query:
     HANDSHAKE = b'\x09'
     STATISTICS = b'\x00'
 
-    def __init__(self, host, port, timeout=5, short_data=False):
+    def __init__(self, host, port, timeout=5):
         self.host = host
         self.port = port
         self.timeout = timeout
-        self.short_data = short_data
 
         self.socket = None
 
@@ -38,7 +45,7 @@ class Query:
             return None
 
         # Returned stats
-        stats = None
+        stats = ServerData()
 
         # get data from the server
         try:
@@ -50,16 +57,52 @@ class Query:
             token = self.socket.recv(65535)[5:-1].decode()
 
             if token is not None:
-                if self.short_data:
-                    payload = b''
-                else:
-                    payload = b"\x00\x00\x00\x00"
+                payload = b"\x00\x00\x00\x00"
 
                 request_stat = Query.MAGIC + Query.STATISTICS + struct.pack("L", randint(1, 9999999)) + struct.pack(
                     '>l', int(token)) + payload
 
                 self.socket.send(request_stat)
-                stats = str(self.socket.recv(65535)[5:])
+                buff = str(self.socket.recv(65535)[5:])
+
+                if buff is not None:
+                    server_data = buff.split(r'\x01')
+                    server_data_1 = server_data[0].split(r'\x00')[2:-2]
+
+                    # Player list
+                    server_data_2 = server_data[1].split(r'\x00')[2:-2]
+
+                    # Trimmed Server Data
+                    data = {}
+                    for i in range(0, len(server_data_1), 2):
+                        data[server_data_1[i]] = server_data_1[i + 1]
+
+                    stats.HOSTNAME = data['hostname']
+                    stats.GAME_TYPE = data['gametype']
+                    stats.GAME_ID = data['game_id']
+                    stats.VERSION = data['version']
+                    stats.SERVER_ENGINE = data['server_engine']
+
+                    # Plugins
+                    plugins = []
+                    for p in data['plugins'].split(';'):
+                        plugins.append(p)
+                    stats.PLUGINS = plugins
+
+                    stats.MAP = data['map']
+                    stats.NUM_PLAYERS = int(data['numplayers'])
+                    stats.MAX_PLAYERS = int(data['maxplayers'])
+                    stats.WHITE_LIST = data['whitelist']
+                    stats.HOST_IP = data['hostip']
+                    stats.HOST_PORT = int(data['hostport'])
+
+                    # Players
+                    players = []
+                    for p in server_data_2:
+                        players.append(p)
+                    stats.PLAYERS = players
+
+                    stats.SUCCESS = True
 
         # The server is offline or it did not enable query
         except socket.error as msg:

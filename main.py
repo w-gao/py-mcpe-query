@@ -1,14 +1,20 @@
-from Query import *
-from ServerData import *
+"""Query an mcpe server easily
+
+main.py
+
+Copyright (c) 2017 w-gao
+"""
+
+from py_mcpe_query.query import Query
 
 # Change the host and port to whatever you want.
 host = 'localhost'
 port = 19132
 
-query = Query(host, port)
-server_data = ServerData(query)
+q = Query(host, port)
+server_data = q.query()
 
-if server_data.SUCCESS:
+if server_data is not None and server_data.SUCCESS:
     print("Host name: " + server_data.HOSTNAME)
     print("Game Type: " + server_data.GAME_TYPE)
     print("Game Id: " + server_data.GAME_ID)

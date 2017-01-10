@@ -39,7 +39,7 @@ server_data = q.query()
 ## Screenshots
 -----------
 
-![ss1](images/screenshot-1.png)
+![ss1](images/screenshot-1.png?raw=true "Sample query")
 
 ## License
 -------

@@ -36,6 +36,12 @@ q = Query(host, port)
 server_data = q.query()
 ```
 
-#### License
+## Screenshots
+-----------
+
+![ss1](images/screenshot-1.png)
+
+## License
+-------
 
 MIT &copy; 2017 w-gao

@@ -1,4 +1,5 @@
 # py-mcpe-query
+
 [![PyPI](https://img.shields.io/pypi/v/py_mcpe_query.svg)](https://pypi.python.org/pypi/py_mcpe_query/)
 
 ![py-mcpe-query](https://github.com/w-gao/py-mcpe-query/blob/master/images/logo.png)
@@ -11,8 +12,9 @@ Note: Some servers don't allow query, check out my other project [py-mcpe-stats]
 
 ## Install
 -------
+
 #### Install via pip
-Run `pip install py_mcpe_query` in your terminal and it will download the latest version of this project.
+Run `pip install py_mcpe_query` in your terminal, and it will download the latest version of this project.
 
 ## Usage
 -----
@@ -44,4 +46,4 @@ server_data = q.query()
 ## License
 -------
 
-MIT &copy; 2017 w-gao
+MIT &copy; 2017-2021 w-gao

@@ -8,19 +8,38 @@ Copyright (c) 2017 w-gao
 import socket
 import struct
 from random import randint
-from ._server_data import ServerData
 
-"""
-______ ___.__.           _____   ____ ______   ____             ________ __   ___________ ___.__.
-\____ <   |  |  ______  /     \_/ ___| |____ \_/ __ \   ______  / ____/  |  \_/ __ \_  __ <   |  |
-|  |_> >___  | /_____/ |  Y Y  \  \___|  |_> >  ___/  /_____/ < <_|  |  |  /\  ___/|  | \/\___  |
-|   __// ____|         |__|_|  /\___  >   __/ \___  >          \__   |____/  \___  >__|   / ____|
-|__|   \/                    \/     \/|__|        \/              |__|           \/       \/
-"""
+
+class ServerData:
+
+    def __init__(self):
+        self.motd = None
+        self.hostname = None
+
+        self.game_type = None
+        self.game_id = None
+        self.version = None
+        self.server_engine = None
+
+        self.plugins = []
+        self.map = None,
+
+        self.num_players = -1
+        self.max_players = -1
+        self.whitelist = None
+
+        self.host_ip = None
+        self.host_port = None
+
+        self.players = []
+
+        self.success = False
+
+    def __str__(self):
+        return '{} - {}:{}'.format(self.hostname, self.host_ip, self.host_port)
 
 
 class Query:
-
     MAGIC = b'\xFE\xFD'
     HANDSHAKE = b'\x09'
     STATISTICS = b'\x00'
@@ -32,9 +51,60 @@ class Query:
 
         self.socket = None
 
-    def query(self):
+    @staticmethod
+    def _parse_data(raw_data: str) -> ServerData:
+        print(raw_data)
 
-        # init socket
+        stats = ServerData()
+
+        server_data = raw_data.split(r'\x01')
+        server_data_1 = server_data[0].split(r'\x00')[2:-2]
+
+        # player list
+        server_data_2 = server_data[1].split(r'\x00')[2:-2]
+
+        # trimmed server data
+        data = {}
+        for i in range(0, len(server_data_1), 2):
+            data[server_data_1[i]] = server_data_1[i + 1]
+
+        stats.hostname = data['hostname']
+        stats.game_type = data['gametype']
+        stats.game_id = data['game_id']
+        stats.version = data['version']
+        stats.server_engine = data['server_engine']
+
+        # plugins
+        plugins = []
+        for p in data['plugins'].split(';'):
+            plugins.append(p)
+        stats.plugins = plugins
+
+        stats.map = data['map']
+        stats.num_players = int(data['numplayers'])
+        stats.max_players = int(data['maxplayers'])
+        stats.whitelist = data['whitelist']
+        stats.host_ip = data['hostip']
+        stats.host_port = int(data['hostport'])
+
+        # players
+        players = []
+        for p in server_data_2:
+            players.append(p)
+        stats.players = players
+
+        stats.success = True
+        return stats
+
+    def query(self):
+        """
+        Initiates a query request to the target server. Returns a ServerData
+        object containing the data returned from the server.
+
+        :return: data
+        """
+        stats = ServerData()
+
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
             self.socket.settimeout(self.timeout)
@@ -42,72 +112,30 @@ class Query:
             self.socket.connect((self.host, self.port))
         except socket.error as msg:
             print("Cannot connect to the server. Error: ", msg)
-            return None
+            return stats
 
-        # Returned stats
-        stats = ServerData()
-
-        # get data from the server
         try:
-            # Handshake
             # Magic + packetType + sessionId + payload
-            hand_shake = Query.MAGIC + Query.HANDSHAKE + struct.pack("L", randint(1, 9999999))
+            handshake = Query.MAGIC + Query.HANDSHAKE + struct.pack('>l', randint(1, 9999999))
 
-            self.socket.send(hand_shake)
+            self.socket.send(handshake)
             token = self.socket.recv(65535)[5:-1].decode()
 
             if token is not None:
-                payload = b"\x00\x00\x00\x00"
+                payload = b'\x00\x00\x00\x00'
 
-                request_stat = Query.MAGIC + Query.STATISTICS + struct.pack("L", randint(1, 9999999)) + struct.pack(
+                request_stat = Query.MAGIC + Query.STATISTICS + struct.pack('>l', randint(1, 9999999)) + struct.pack(
                     '>l', int(token)) + payload
 
                 self.socket.send(request_stat)
                 buff = str(self.socket.recv(65535)[5:])
 
                 if buff is not None:
-                    server_data = buff.split(r'\x01')
-                    server_data_1 = server_data[0].split(r'\x00')[2:-2]
-
-                    # Player list
-                    server_data_2 = server_data[1].split(r'\x00')[2:-2]
-
-                    # Trimmed Server Data
-                    data = {}
-                    for i in range(0, len(server_data_1), 2):
-                        data[server_data_1[i]] = server_data_1[i + 1]
-
-                    stats.HOSTNAME = data['hostname']
-                    stats.GAME_TYPE = data['gametype']
-                    stats.GAME_ID = data['game_id']
-                    stats.VERSION = data['version']
-                    stats.SERVER_ENGINE = data['server_engine']
-
-                    # Plugins
-                    plugins = []
-                    for p in data['plugins'].split(';'):
-                        plugins.append(p)
-                    stats.PLUGINS = plugins
-
-                    stats.MAP = data['map']
-                    stats.NUM_PLAYERS = int(data['numplayers'])
-                    stats.MAX_PLAYERS = int(data['maxplayers'])
-                    stats.WHITE_LIST = data['whitelist']
-                    stats.HOST_IP = data['hostip']
-                    stats.HOST_PORT = int(data['hostport'])
-
-                    # Players
-                    players = []
-                    for p in server_data_2:
-                        players.append(p)
-                    stats.PLAYERS = players
-
-                    stats.SUCCESS = True
+                    return self._parse_data(buff)
 
         # The server is offline or it did not enable query
         except socket.error as msg:
             print('Failed to query. Error message: ', msg)
 
-        # print('closing the socket')
         self.socket.close()
         return stats

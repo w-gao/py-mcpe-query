@@ -1,13 +1,11 @@
-"""Query an mcpe server easily
-
-query.py
-
+"""
 Copyright (c) 2017 w-gao
 """
 
 import socket
 import struct
 from random import randint
+from typing import Optional
 
 
 class ServerData:
@@ -44,59 +42,14 @@ class Query:
     HANDSHAKE = b'\x09'
     STATISTICS = b'\x00'
 
-    def __init__(self, host, port, timeout=5):
+    def __init__(self, host: str, port: int, timeout: Optional[int] = 5):
         self.host = host
         self.port = port
         self.timeout = timeout
 
         self.socket = None
 
-    @staticmethod
-    def _parse_data(raw_data: str) -> ServerData:
-        print(raw_data)
-
-        stats = ServerData()
-
-        server_data = raw_data.split(r'\x01')
-        server_data_1 = server_data[0].split(r'\x00')[2:-2]
-
-        # player list
-        server_data_2 = server_data[1].split(r'\x00')[2:-2]
-
-        # trimmed server data
-        data = {}
-        for i in range(0, len(server_data_1), 2):
-            data[server_data_1[i]] = server_data_1[i + 1]
-
-        stats.hostname = data['hostname']
-        stats.game_type = data['gametype']
-        stats.game_id = data['game_id']
-        stats.version = data['version']
-        stats.server_engine = data['server_engine']
-
-        # plugins
-        plugins = []
-        for p in data['plugins'].split(';'):
-            plugins.append(p)
-        stats.plugins = plugins
-
-        stats.map = data['map']
-        stats.num_players = int(data['numplayers'])
-        stats.max_players = int(data['maxplayers'])
-        stats.whitelist = data['whitelist']
-        stats.host_ip = data['hostip']
-        stats.host_port = int(data['hostport'])
-
-        # players
-        players = []
-        for p in server_data_2:
-            players.append(p)
-        stats.players = players
-
-        stats.success = True
-        return stats
-
-    def query(self):
+    def query(self) -> ServerData:
         """
         Initiates a query request to the target server. Returns a ServerData
         object containing the data returned from the server.
@@ -138,4 +91,46 @@ class Query:
             print('Failed to query. Error message: ', msg)
 
         self.socket.close()
+        return stats
+
+    @staticmethod
+    def _parse_data(raw_data: str) -> ServerData:
+        stats = ServerData()
+
+        server_data = raw_data.split(r'\x01')
+        assert len(server_data) == 2, f'Error parsing data: "{raw_data}".  Format has likely changed.'
+
+        server_data_1 = server_data[0].split(r'\x00')[2:-2]
+        server_data_2 = server_data[1].split(r'\x00')[2:-2]  # player list
+
+        # trimmed server data
+        data = {}
+        for i in range(0, len(server_data_1), 2):
+            data[server_data_1[i]] = server_data_1[i + 1]
+
+        stats.hostname = data.get('hostname')
+        stats.game_type = data.get('gametype')
+        stats.game_id = data.get('game_id')
+        stats.version = data.get('version')
+        stats.server_engine = data.get('server_engine')
+
+        # plugins
+        plugins = []
+        for p in data.get('plugins', '').split(';'):
+            plugins.append(p)
+        stats.plugins = plugins
+
+        stats.map = data.get('map')
+        stats.num_players = int(data.get('numplayers', -1))
+        stats.max_players = int(data.get('maxplayers', -1))
+        stats.whitelist = data.get('whitelist')
+        stats.host_ip = data.get('hostip')
+        stats.host_port = int(data.get('hostport', -1))
+
+        players = []
+        for p in server_data_2:
+            players.append(p)
+        stats.players = players
+
+        stats.success = True
         return stats

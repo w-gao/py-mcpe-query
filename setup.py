@@ -1,20 +1,20 @@
-"""Query an mcpe server easily
-
-setup.py
-
-Copyright (c) 2017 w-gao
+"""
+Copyright (c) 2017-2021 w-gao
 """
 
 from setuptools import setup
 
 setup(name='py_mcpe_query',
-      version='0.1',
-      description='Query an mcpe server easily',
-      long_description='a Python software that uses the query protocol to ping an mcpe server for basic information',
+      version='0.2.1',
+      description='Query a Minecraft: bedrock edition server easily',
+      long_description='a Python software that uses the query protocol to ping a Minecraft: Bedrock edition server '
+                       'for basic information',
       url='https://github.com/w-gao/py-mcpe-query',
       author='w-gao',
-      author_email='w-gao@users.noreply.github.com',
+      author_email='dev@wlgao.com',
       license='MIT',
+      packages=['mcpe_query'],
+      python_requires=">=3.6",
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
@@ -22,10 +22,8 @@ setup(name='py_mcpe_query',
           'Intended Audience :: System Administrators',
           'License :: OSI Approved :: MIT License',
           'Natural Language :: English',
-          'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
           'Topic :: Software Development :: Libraries :: Python Modules',
           'Topic :: System :: Networking'
       ],
-      keywords='mcpe minecraft mcpeserver',
-      packages=['py_mcpe_query']
-      )
+      keywords='mcpe minecraft mcpeserver')

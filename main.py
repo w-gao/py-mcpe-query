@@ -1,16 +1,13 @@
-"""Query an mcpe server easily
-
-main.py
-
+"""
 Copyright (c) 2017 w-gao
 """
 
-from py_mcpe_query.query import Query
+from mcpe_query.query import Query
 
 # TODO: argparse
 
 # Change the host and port to whatever you want.
-host = 'localhost'
+host = 'play.minefinemc.net'
 port = 19132
 
 q = Query(host, port)
@@ -24,7 +21,7 @@ if data is not None and data.success:
     print("Server Engine: " + data.server_engine)
     print("Plugins: ", data.plugins)
     print("Map: " + data.map)
-    print("Player count: ", data.num_players, '/', data.max_players)
-    print("White list: " + data.whitelist)
+    print("Players: ", data.num_players, '/', data.max_players)
+    print("Whitelist: " + data.whitelist)
     print("Host: " + data.host_ip, ":", data.host_port)
     print("Players: ", data.players)

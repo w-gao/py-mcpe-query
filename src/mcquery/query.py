@@ -25,12 +25,20 @@ class QueryNetworkError(Exception):
     """
     Exception thrown when the socket connection fails.
     """
+    pass
 
 
 class QueryFormatError(Exception):
     """
     Exception thrown when the data returned from the server is malformed.
     """
+    def __init__(self, raw_data=None):
+        if raw_data:
+            msg = f"Error parsing data: '{raw_data}'.  Format has likely changed."
+        else:
+            msg = "Error parsing data from the target server.  Format has likely changed."
+
+        super(QueryFormatError, self).__init__(msg)
 
 
 class QueryServerData:
@@ -100,6 +108,9 @@ def mcquery(host: str, port: int = 19132, timeout: int = 5) -> Generator[QuerySe
                 logger.debug("Got data from server.")
                 logger.debug("Parsing data...")
                 yield _parse_data(buff)
+                return
+
+        raise QueryFormatError
 
     except socket.error as msg:
         raise QueryNetworkError(f"Failed to query: '{msg}'")
@@ -110,14 +121,14 @@ def mcquery(host: str, port: int = 19132, timeout: int = 5) -> Generator[QuerySe
 
 def _parse_data(raw_data: str) -> QueryServerData:
     """
-    Interval function for parsing the raw data from the target server into a
+    Internal function for parsing the raw data from the target server into a
     QueryServerData object.
     """
     stats = QueryServerData()
 
     server_data = raw_data.split(r'\x01')
     if len(server_data) != 2:
-        raise QueryFormatError(f"Error parsing data: '{raw_data}'.  Format has likely changed.")
+        raise QueryFormatError(raw_data)
 
     server_data_1 = server_data[0].split(r'\x00')[2:-2]
     server_data_2 = server_data[1].split(r'\x00')[2:-2]  # player list

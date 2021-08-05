@@ -6,22 +6,24 @@
 ## Introduction
 ------------
 mcquery (aka py-mcpe-query) is a Python software that uses the query protocol to ping a Minecraft: Bedrock edition 
-server for basic information. Note: If you get a timeout error, it might be that the target server do not support the 
-query protocol. If that happens, you can use [py-mcpe-stats](https://github.com/w-gao/py-mcpe-stats) where you can 
-ping a server without the query protocol.
+server for basic information.
+
+Note: If you get a timeout error, it might be that the target server do not support the query protocol. If that happens,
+you can use [mcstats](https://github.com/w-gao/py-mcpe-stats) instead, where you can ping a server without the query 
+protocol.
 
 ## Install
 -------
 
 #### Install via pip
-Run `pip install mcquery` in your terminal, and it will download the latest version of this project.
+Run `pip install mcquery` in your terminal, and it will install the latest version of this project in your Python 
+environment.
 
 #### Install from source
 
 Clone this repository and run the following in the root folder of this project:
 ```
-python setup.py build
-python setup.py install
+python setup.py build install
 ```
 
 ## Usage
@@ -32,7 +34,26 @@ python setup.py install
 After installation, the `mcquery` command will be available in your Python environment. You can perform a query with 
 the following command: `mcquery localhost`.
 
-You can also provide the port with the `-p` option as such `mcquery localhost -p 19133`. For more options, please run 
+Example:
+```
+$ mcquery play.lbsg.net
+Motd: None
+Hostname: {-name-:-Lifeboat Proxy-,-node-:{-type-:-PROXY-,-ip-:-proxy14.lbsg.net-,-players-:91,-maxplayers-:400,-tps-:39.950001}}
+Game type: None
+Game id: None
+Version: None
+Server engine: None
+Plugins: ['']
+Map: None
+Num players: 91
+Max players: 400
+Whitelist: None
+Host ip: **.***.**.**
+Host port: 19132
+Players: []
+```
+
+You can also specify the port with the `-p` option (e.g.: `mcquery localhost -p 19133`). For more options, please run 
 `mcquery --help`.
 
 
@@ -47,7 +68,7 @@ host = "localhost"
 port = 19132
 
 with mcquery(host, port=port, timeout=10) as data:
-    # data is a QueryServerData instance
+    # data is a QueryServerData object
     print(data)
 ```
 

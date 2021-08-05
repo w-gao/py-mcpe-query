@@ -9,7 +9,7 @@ with open(path.join(path.abspath(path.dirname(__file__)), 'README.md'), encoding
 
 
 setup(name='mcquery',
-      version='0.0.3',
+      version='0.1.0',
       description='Query tool for Minecraft: Bedrock Edition servers.',
       long_description=long_description,
       long_description_content_type='text/markdown',

@@ -8,9 +8,10 @@
 mcquery (aka py-mcpe-query) is a Python software that uses the query protocol to ping a Minecraft: Bedrock edition 
 server for basic information.
 
-Note: If you get a timeout error, it might be that the target server do not support the query protocol. If that happens,
-you can use [mcstats](https://github.com/w-gao/py-mcpe-stats) instead, where you can ping a server without the query 
-protocol.
+Note: Some servers silently drop the query packets of "cold" clients, which shows up as a timeout error. In that case
+mcquery wakes the server up with a RakNet unconnected ping and retries on its own. If the target server does not
+support the query protocol at all, you can use [mcstats](https://github.com/w-gao/py-mcpe-stats) instead, where you can
+ping a server without the query protocol.
 
 ## Install
 -------
